@@ -1,0 +1,24 @@
+- name: Trigger Jenkins job
+  hosts: localhost
+  become: yes
+  vars:
+    Uname: "admin"
+    Pass: "1234"
+    HostName: "44.203.215.131:8080"
+    TokenName: "1173e0e604c3c34cad42f43ed43a3d85f6"
+  tasks:
+  - name: Trigger Jenkins job
+    uri:
+      url: http://{{ HostName }}/job/{{ JobName }}/build?token={{ TokenName }}
+      method: POST
+      user: "{{ Uname }}"
+      password: "{{ Pass }}"
+      force_basic_auth: yes
+      status_code: 403
+    register: result
+
+  - name: Display Jenkins job trigger result
+    debug:
+      var: result
+
+

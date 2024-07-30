@@ -1,0 +1,51 @@
+---
+- name: Ensure Jenkins CLI is present
+  get_url:
+    url: "{{ jenkins_url }}/jnlpJars/jenkins-cli.jar"
+    dest: /tmp/jenkins-cli.jar
+
+- name: Check if seed job exists
+  command: java -jar /tmp/jenkins-cli.jar -s {{ jenkins_url }} -auth {{ jenkins_user }}:{{ jenkins_token }} get-job seed-job
+  register: seed_job_exists
+  failed_when: false
+  ignore_errors: true
+
+- name: Create seed job XML
+  template:
+    src: seed-job.xml.j2
+    dest: /tmp/seed-job.xml
+
+- name: Create seed job Groovy script
+  template:
+    src: jobs.groovy.j2
+    dest: /tmp/jobs.groovy
+
+- name: Ensure Jenkins workspace directory exists and has proper permissions
+  file:
+    path: /var/lib/jenkins/workspace
+    state: directory
+    owner: jenkins
+    group: jenkins
+    mode: '0777'
+
+- name: Ensure seed-job directory exists and has proper permissions
+  file:
+    path: /var/lib/jenkins/workspace/seed-job
+    state: directory
+    owner: jenkins
+    group: jenkins
+    mode: '0777'
+
+- name: Copy Groovy script to Jenkins workspace
+  copy:
+    src: /tmp/jobs.groovy
+    dest: /var/lib/jenkins/workspace/seed-job/jobs.groovy
+    owner: jenkins
+    group: jenkins
+    mode: '0777'
+
+- name: Create seed job on Jenkins
+  shell: java -jar /tmp/jenkins-cli.jar -s {{ jenkins_url }} -auth {{ jenkins_user }}:{{ jenkins_token }} create-job seed-job < /tmp/seed-job.xml
+  when: seed_job_exists.rc != 0
+  register: seed_job_creation
+

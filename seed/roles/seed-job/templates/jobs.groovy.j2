@@ -1,0 +1,62 @@
+pipelineJob('job1') {
+    definition {
+        cps {
+            script('''
+pipeline {
+    agent any
+    stages {
+        stage('Build') {
+            steps {
+                echo 'Building job1...'
+            }
+        }
+        stage('Test') {
+            steps {
+                echo 'Testing job1...'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo 'Deploying job1...'
+            }
+        }
+    }
+}
+            '''.stripIndent())
+            sandbox()
+        }
+    }
+}
+
+pipelineJob('job2') {
+    definition {
+        cps {
+            script('''
+pipeline {
+    agent any
+    stages {
+        stage('Build') {
+            steps {
+                echo 'Building job2...'
+            }
+        }
+        stage('Test') {
+            steps {
+                echo 'Testing job2...'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo 'Deploying job2...'
+            }
+        }
+    }
+}
+            '''.stripIndent())
+            sandbox()
+        }
+    }
+}
+
+// Add more jobs as needed
+

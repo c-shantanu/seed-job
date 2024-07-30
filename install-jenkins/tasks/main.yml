@@ -1,0 +1,30 @@
+---
+# tasks file for install-jenkins
+- name: Download Jenkins GPG key and store in system's keyring
+  get_url:
+    url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+    dest: /usr/share/keyrings/jenkins-keyring.asc
+- name: Create file as /etc/apt/sources.list.d/jenkins.list with content
+  copy:
+    dest: /etc/apt/sources.list.d/jenkins.list
+    content: deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/
+
+- name: Update all packages to their latest version
+  apt:
+    update_cache: yes
+    force_apt_get: yes
+- name: Installing Jenkins packages
+  apt:
+    name: '{{ item }}'
+    state: present
+  with_items:
+    - fontconfig
+    - openjdk-17-jre
+    - jenkins
+- name: Store value of inital password in variable
+  shell:
+    cat /var/lib/jenkins/secrets/initialAdminPassword
+  register: command_output
+- name: Display initial admin password
+  debug:
+    var: command_output.stdout_lines
